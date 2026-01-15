@@ -1,0 +1,261 @@
+import React, { useState } from 'react';
+import { Plus, Trash2, Calculator } from 'lucide-react';
+
+const GradeConverter = () => {
+  const [courses, setCourses] = useState([
+    { id: 1, name: '', university: 'UW', grade: '', credits: '' }
+  ]);
+
+  const conversionTable = {
+    UW: [
+      { min: 90, max: 100, wluLetter: 'A+', wluPoints: 12, uwAvg: 95, gpa4: 4.0 },
+      { min: 85, max: 89, wluLetter: 'A', wluPoints: 11, uwAvg: 89, gpa4: 3.9 },
+      { min: 80, max: 84, wluLetter: 'A-', wluPoints: 10, uwAvg: 83, gpa4: 3.7 },
+      { min: 77, max: 79, wluLetter: 'B+', wluPoints: 9, uwAvg: 78, gpa4: 3.3 },
+      { min: 73, max: 76, wluLetter: 'B', wluPoints: 8, uwAvg: 75, gpa4: 3.0 },
+      { min: 70, max: 72, wluLetter: 'B-', wluPoints: 7, uwAvg: 72, gpa4: 2.7 },
+      { min: 67, max: 69, wluLetter: 'C+', wluPoints: 6, uwAvg: 68, gpa4: 2.3 },
+      { min: 63, max: 66, wluLetter: 'C', wluPoints: 5, uwAvg: 65, gpa4: 2.0 },
+      { min: 60, max: 62, wluLetter: 'C-', wluPoints: 4, uwAvg: 62, gpa4: 1.7 },
+      { min: 57, max: 59, wluLetter: 'D+', wluPoints: 3, uwAvg: 58, gpa4: 1.3 },
+      { min: 53, max: 56, wluLetter: 'D', wluPoints: 2, uwAvg: 55, gpa4: 1.0 },
+      { min: 50, max: 52, wluLetter: 'D-', wluPoints: 1, uwAvg: 52, gpa4: 0.7 },
+      { min: 0, max: 49, wluLetter: 'F', wluPoints: 0, uwAvg: 32, gpa4: 0.0 }
+    ],
+    WLU: [
+      { letter: 'A+', points: 12, uwAvg: 95, gpa4: 4.0 },
+      { letter: 'A', points: 11, uwAvg: 89, gpa4: 3.9 },
+      { letter: 'A-', points: 10, uwAvg: 83, gpa4: 3.7 },
+      { letter: 'B+', points: 9, uwAvg: 78, gpa4: 3.3 },
+      { letter: 'B', points: 8, uwAvg: 75, gpa4: 3.0 },
+      { letter: 'B-', points: 7, uwAvg: 72, gpa4: 2.7 },
+      { letter: 'C+', points: 6, uwAvg: 68, gpa4: 2.3 },
+      { letter: 'C', points: 5, uwAvg: 65, gpa4: 2.0 },
+      { letter: 'C-', points: 4, uwAvg: 62, gpa4: 1.7 },
+      { letter: 'D+', points: 3, uwAvg: 58, gpa4: 1.3 },
+      { letter: 'D', points: 2, uwAvg: 55, gpa4: 1.0 },
+      { letter: 'D-', points: 1, uwAvg: 52, gpa4: 0.7 },
+      { letter: 'F', points: 0, uwAvg: 32, gpa4: 0.0 }
+    ]
+  };
+
+  const convertGrade = (university, grade) => {
+    if (!grade) return null;
+
+    if (university === 'UW') {
+      const numGrade = parseFloat(grade);
+      if (isNaN(numGrade)) return null;
+      
+      const conversion = conversionTable.UW.find(
+        c => numGrade >= c.min && numGrade <= c.max
+      );
+      return conversion;
+    } else {
+      const upperGrade = grade.toUpperCase();
+      const conversion = conversionTable.WLU.find(
+        c => c.letter === upperGrade
+      );
+      return conversion;
+    }
+  };
+
+  const addCourse = () => {
+    const newId = Math.max(...courses.map(c => c.id), 0) + 1;
+    setCourses([...courses, { id: newId, name: '', university: 'UW', grade: '', credits: '' }]);
+  };
+
+  const removeCourse = (id) => {
+    if (courses.length > 1) {
+      setCourses(courses.filter(c => c.id !== id));
+    }
+  };
+
+  const updateCourse = (id, field, value) => {
+    setCourses(courses.map(c => 
+      c.id === id ? { ...c, [field]: value } : c
+    ));
+  };
+
+  const calculateAverages = () => {
+    const validCourses = courses.filter(c => {
+      if (!c.grade || !c.credits) return false;
+      const credits = parseFloat(c.credits);
+      if (isNaN(credits) || credits <= 0) return false;
+      return convertGrade(c.university, c.grade) !== null;
+    });
+
+    if (validCourses.length === 0) return null;
+
+    let uwTotal = 0;
+    let wluTotal = 0;
+    let totalCredits = 0;
+
+    validCourses.forEach(course => {
+      const conversion = convertGrade(course.university, course.grade);
+      const credits = parseFloat(course.credits);
+      
+      uwTotal += conversion.uwAvg * credits;
+      wluTotal += conversion.wluPoints * credits;
+      totalCredits += credits;
+    });
+
+    return {
+      uwAverage: (uwTotal / totalCredits).toFixed(2),
+      wluAverage: (wluTotal / totalCredits).toFixed(2),
+      gpa4: (validCourses.reduce((sum, c) => {
+        const conv = convertGrade(c.university, c.grade);
+        return sum + (conv.gpa4 * parseFloat(c.credits));
+      }, 0) / totalCredits).toFixed(2),
+      totalCredits: totalCredits.toFixed(1)
+    };
+  };
+
+  const results = calculateAverages();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <h1 className="text-3xl font-bold text-purple-900 mb-2">
+            UW/WLU Double Degree GPA Calculator
+          </h1>
+          <p className="text-gray-600 text-sm">
+            Enter your courses and grades to calculate your averages at both universities
+          </p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <div className="grid grid-cols-12 gap-3 mb-3 font-semibold text-gray-700 text-sm">
+            <div className="col-span-3">Course Name</div>
+            <div className="col-span-2">University</div>
+            <div className="col-span-3">Grade</div>
+            <div className="col-span-2">Credits</div>
+            <div className="col-span-2">Converted</div>
+          </div>
+
+          {courses.map((course, index) => {
+            const conversion = convertGrade(course.university, course.grade);
+            return (
+              <div key={course.id} className="grid grid-cols-12 gap-3 mb-3 items-center">
+                <input
+                  type="text"
+                  placeholder="e.g., MATH 135"
+                  value={course.name}
+                  onChange={(e) => updateCourse(course.id, 'name', e.target.value)}
+                  className="col-span-3 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+                
+                <select
+                  value={course.university}
+                  onChange={(e) => updateCourse(course.id, 'university', e.target.value)}
+                  className="col-span-2 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="UW">UW</option>
+                  <option value="WLU">WLU</option>
+                </select>
+
+                <input
+                  type="text"
+                  placeholder={course.university === 'UW' ? '0-100' : 'A+, B, C-, etc.'}
+                  value={course.grade}
+                  onChange={(e) => updateCourse(course.id, 'grade', e.target.value)}
+                  className="col-span-3 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+
+                <input
+                  type="number"
+                  step="0.5"
+                  placeholder="0.5"
+                  value={course.credits}
+                  onChange={(e) => updateCourse(course.id, 'credits', e.target.value)}
+                  className="col-span-2 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+
+                <div className="col-span-2 flex items-center justify-between">
+                  <span className="text-sm text-gray-600">
+                    {conversion ? (
+                      <span>
+                        {course.university === 'UW' 
+                          ? `${conversion.wluLetter} (${conversion.wluPoints})`
+                          : `${conversion.uwAvg}%`
+                        }
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">—</span>
+                    )}
+                  </span>
+                  <button
+                    onClick={() => removeCourse(course.id)}
+                    className="ml-2 text-red-500 hover:text-red-700 disabled:text-gray-300"
+                    disabled={courses.length === 1}
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+
+          <button
+            onClick={addCourse}
+            className="mt-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
+          >
+            <Plus size={18} />
+            Add Course
+          </button>
+        </div>
+
+        {results && (
+          <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+            <div className="flex items-center gap-2 mb-4">
+              <Calculator size={24} />
+              <h2 className="text-2xl font-bold">Your Results</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                <div className="text-sm opacity-90 mb-1">UW Average</div>
+                <div className="text-3xl font-bold">{results.uwAverage}%</div>
+              </div>
+              
+              <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                <div className="text-sm opacity-90 mb-1">WLU Average</div>
+                <div className="text-3xl font-bold">{results.wluAverage}</div>
+                <div className="text-xs opacity-75">out of 12</div>
+              </div>
+              
+              <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                <div className="text-sm opacity-90 mb-1">4.0 GPA Scale</div>
+                <div className="text-3xl font-bold">{results.gpa4}</div>
+                <div className="text-xs opacity-75">out of 4.0</div>
+              </div>
+              
+              <div className="bg-white bg-opacity-20 rounded-lg p-4">
+                <div className="text-sm opacity-90 mb-1">Total Credits</div>
+                <div className="text-3xl font-bold">{results.totalCredits}</div>
+              </div>
+            </div>
+
+            <div className="mt-4 text-sm opacity-90 bg-white bg-opacity-10 rounded p-3">
+              <strong>Note:</strong> Your UW transcript shows the percentage average ({results.uwAverage}%), 
+              while your WLU transcript shows the 12-point scale average ({results.wluAverage}).
+            </div>
+          </div>
+        )}
+
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-gray-700">
+          <h3 className="font-semibold text-blue-900 mb-2">How It Works</h3>
+          <ul className="space-y-1 text-xs">
+            <li>• Enter your course grades using the grading system from each university (UW: 0-100, WLU: letter grades)</li>
+            <li>• The calculator converts grades between systems and calculates both averages</li>
+            <li>• UW courses are converted to WLU's 12-point scale for your WLU transcript</li>
+            <li>• WLU courses are converted to percentages for your UW transcript</li>
+            <li>• Example: A 76% at UW becomes a B (8 points) at WLU, but a B at WLU becomes 75% at UW</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default GradeConverter;
