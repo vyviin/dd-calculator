@@ -195,7 +195,7 @@ const GradeConverter = () => {
         </div>
 
         {/* Course Table - Desktop */}
-        <div className="mb-6 sm:mb-8 hidden sm:block">
+        <div className="mb-6 sm:mb-8 hidden md:block">
           <div className="grid grid-cols-12 gap-3 mb-2 px-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
             <div className="col-span-3">Course Name</div>
             <div className="col-span-2">University</div>
