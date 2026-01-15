@@ -97,7 +97,11 @@ const GradeConverter = () => {
 
   const removeCourse = (id) => {
     if (courses.length > 1) {
-      setCourses(courses.filter(c => c.id !== id));
+      const newCourses = courses.filter(c => c.id !== id);
+      setCourses(newCourses);
+      localStorage.setItem('dd-calculator-courses', JSON.stringify(newCourses));
+      setSaveMessage('Course removed');
+      setTimeout(() => setSaveMessage(''), 2000);
     }
   };
 
@@ -274,6 +278,16 @@ const GradeConverter = () => {
             <Plus size={16} />
             Add Course
           </button>
+
+          {courses.length > 1 && (
+            <button
+              onClick={clearAllCourses}
+              className="mt-4 ml-2 inline-flex items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+            >
+              <Trash2 size={16} />
+              Clear All
+            </button>
+          )}
         </div>
 
         {/* Results */}
