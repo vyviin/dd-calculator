@@ -1,10 +1,33 @@
-import React, { useState } from 'react';
-import { Plus, Trash2, Calculator, GraduationCap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Trash2, Calculator, GraduationCap, Save } from 'lucide-react';
 
 const GradeConverter = () => {
   const [courses, setCourses] = useState([
     { id: 1, name: '', university: 'UW', grade: '', credits: '' }
   ]);
+  const [saveMessage, setSaveMessage] = useState('');
+
+  // Load courses from localStorage on mount
+  useEffect(() => {
+    const savedCourses = localStorage.getItem('dd-calculator-courses');
+    if (savedCourses) {
+      try {
+        const parsed = JSON.parse(savedCourses);
+        if (parsed && parsed.length > 0) {
+          setCourses(parsed);
+        }
+      } catch (e) {
+        console.error('Failed to load saved courses:', e);
+      }
+    }
+  }, []);
+
+  // Save courses to localStorage whenever they change
+  useEffect(() => {
+    if (courses.length > 0) {
+      localStorage.setItem('dd-calculator-courses', JSON.stringify(courses));
+    }
+  }, [courses]);
 
   const conversionTable = {
     UW: [
@@ -140,24 +163,39 @@ const GradeConverter = () => {
     };
   };
 
+  const clearAllCourses = () => {
+    if (confirm('Are you sure you want to clear all courses? This cannot be undone.')) {
+      setCourses([{ id: 1, name: '', university: 'UW', grade: '', credits: '' }]);
+      localStorage.removeItem('dd-calculator-courses');
+      setSaveMessage('All courses cleared');
+      setTimeout(() => setSaveMessage(''), 2000);
+    }
+  };
+
   const results = calculateAverages();
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
         {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-2 mb-3">
-            <GraduationCap className="text-gray-700" size={32} strokeWidth={1.5} />
-            <h1 className="text-4xl font-semibold text-gray-900">UW/WLU GPA Calculator</h1>
+        <div className="mb-8 sm:mb-12">
+          <div className="flex items-center gap-2 mb-2 sm:mb-3">
+            <GraduationCap className="text-gray-700" size={28} strokeWidth={1.5} />
+            <h1 className="text-2xl sm:text-4xl font-semibold text-gray-900">UW/WLU GPA Calculator</h1>
           </div>
-          <p className="text-gray-500 text-base">
+          <p className="text-gray-500 text-sm sm:text-base">
             Enter your courses and grades to calculate your averages at both universities
           </p>
+          {saveMessage && (
+            <div className="mt-3 inline-flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-1.5 rounded-md border border-green-200">
+              <Save size={14} />
+              {saveMessage}
+            </div>
+          )}
         </div>
 
-        {/* Course Table */}
-        <div className="mb-8">
+        {/* Course Table - Desktop */}
+        <div className="mb-6 sm:mb-8 hidden sm:block">
           <div className="grid grid-cols-12 gap-3 mb-2 px-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
             <div className="col-span-3">Course Name</div>
             <div className="col-span-2">University</div>
@@ -240,37 +278,37 @@ const GradeConverter = () => {
 
         {/* Results */}
         {results && (
-          <div className="bg-gray-50 rounded-lg border border-gray-200 p-6 mb-6">
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 sm:p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
               <Calculator size={20} className="text-gray-700" strokeWidth={1.5} />
-              <h2 className="text-xl font-semibold text-gray-900">Your Results</h2>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Your Results</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-white rounded-md border border-gray-200 p-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-white rounded-md border border-gray-200 p-3 sm:p-4">
                 <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">UW Average</div>
-                <div className="text-3xl font-semibold text-gray-900">{results.uwAverage}%</div>
+                <div className="text-2xl sm:text-3xl font-semibold text-gray-900">{results.uwAverage}%</div>
               </div>
               
-              <div className="bg-white rounded-md border border-gray-200 p-4">
+              <div className="bg-white rounded-md border border-gray-200 p-3 sm:p-4">
                 <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">WLU Average</div>
-                <div className="text-3xl font-semibold text-gray-900">{results.wluAverage}</div>
+                <div className="text-2xl sm:text-3xl font-semibold text-gray-900">{results.wluAverage}</div>
                 <div className="text-xs text-gray-500">out of 12</div>
               </div>
               
-              <div className="bg-white rounded-md border border-gray-200 p-4">
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">4.0 GPA Scale</div>
-                <div className="text-3xl font-semibold text-gray-900">{results.gpa4}</div>
+              <div className="bg-white rounded-md border border-gray-200 p-3 sm:p-4">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">4.0 GPA</div>
+                <div className="text-2xl sm:text-3xl font-semibold text-gray-900">{results.gpa4}</div>
                 <div className="text-xs text-gray-500">out of 4.0</div>
               </div>
               
-              <div className="bg-white rounded-md border border-gray-200 p-4">
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Total Credits</div>
-                <div className="text-3xl font-semibold text-gray-900">{results.totalCredits}</div>
+              <div className="bg-white rounded-md border border-gray-200 p-3 sm:p-4">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Credits</div>
+                <div className="text-2xl sm:text-3xl font-semibold text-gray-900">{results.totalCredits}</div>
               </div>
             </div>
 
-            <div className="mt-4 text-sm text-gray-600 bg-blue-50 border border-blue-100 rounded-md p-3">
+            <div className="mt-4 text-xs sm:text-sm text-gray-600 bg-blue-50 border border-blue-100 rounded-md p-3">
               <strong>Note:</strong> Your UW transcript shows the percentage average ({results.uwAverage}%), 
               while your WLU transcript shows the 12-point scale average ({results.wluAverage}).
             </div>
@@ -278,9 +316,9 @@ const GradeConverter = () => {
         )}
 
         {/* Info */}
-        <div className="bg-gray-50 rounded-lg border border-gray-200 p-5">
+        <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 sm:p-5">
           <h3 className="font-semibold text-gray-900 mb-3 text-sm">How It Works</h3>
-          <ul className="space-y-2 text-sm text-gray-600">
+          <ul className="space-y-2 text-xs sm:text-sm text-gray-600">
             <li>• Enter your course grades using the grading system from each university (UW: 0-100, WLU: letter grades)</li>
             <li>• The calculator converts grades between systems and calculates both averages</li>
             <li>• UW courses are converted to WLU's 12-point scale for your WLU transcript</li>
