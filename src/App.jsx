@@ -106,8 +106,9 @@ const GradeConverter = () => {
   };
 
   const updateCourse = (id, field, value) => {
-    setCourses(courses.map(c => 
-      c.id === id ? { ...c, [field]: value } : c
+    const sanitizedValue = field === 'credits' ? Math.max(0, parseFloat(value || '0')) || '' : value;
+    setCourses(courses.map(c =>
+      c.id === id ? { ...c, [field]: sanitizedValue } : c
     ));
   };
 
@@ -240,6 +241,7 @@ const GradeConverter = () => {
                 <input
                   type="number"
                   step="0.5"
+                  min="0"
                   placeholder="0.5"
                   value={course.credits}
                   onChange={(e) => updateCourse(course.id, 'credits', e.target.value)}
@@ -271,6 +273,81 @@ const GradeConverter = () => {
             );
           })}
 
+        </div>
+
+        {/* Course List - Mobile */}
+        <div className="mb-6 sm:mb-8 md:hidden space-y-3">
+          {courses.map((course) => {
+            const conversion = convertGrade(course.university, course.grade);
+            return (
+              <div key={course.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Course</div>
+                  <button
+                    onClick={() => removeCourse(course.id)}
+                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:hover:bg-transparent disabled:hover:text-gray-300"
+                    disabled={courses.length === 1}
+                    aria-label="Remove course"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+
+                <input
+                  type="text"
+                  placeholder="e.g., MATH 135"
+                  value={course.name}
+                  onChange={(e) => updateCourse(course.id, 'name', e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                />
+
+                <div className="grid grid-cols-2 gap-3">
+                  <select
+                    value={course.university}
+                    onChange={(e) => updateCourse(course.id, 'university', e.target.value)}
+                    className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                  >
+                    <option value="UW">UW</option>
+                    <option value="WLU">WLU</option>
+                  </select>
+
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    placeholder="Credits"
+                    value={course.credits}
+                    onChange={(e) => updateCourse(course.id, 'credits', e.target.value)}
+                    className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                  />
+                </div>
+
+                <input
+                  type="text"
+                  placeholder={course.university === 'UW' ? 'Grade (0-100)' : 'Grade (A+, B, C-, etc.)'}
+                  value={course.grade}
+                  onChange={(e) => updateCourse(course.id, 'grade', e.target.value)}
+                  className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
+                />
+
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Converted</span>
+                  <span className="text-gray-700">
+                    {conversion ? (
+                      <span>
+                        {course.university === 'UW'
+                          ? `${conversion.wluLetter} (${conversion.wluPoints})`
+                          : `${conversion.uwAvg}%`
+                        }
+                      </span>
+                    ) : (
+                      <span className="text-gray-300">—</span>
+                    )}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="mb-6 sm:mb-8">
