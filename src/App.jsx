@@ -271,9 +271,12 @@ const GradeConverter = () => {
             );
           })}
 
+        </div>
+
+        <div className="mb-6 sm:mb-8">
           <button
             onClick={addCourse}
-            className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
           >
             <Plus size={16} />
             Add Course
@@ -282,7 +285,7 @@ const GradeConverter = () => {
           {courses.length > 1 && (
             <button
               onClick={clearAllCourses}
-              className="mt-4 ml-2 inline-flex items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
+              className="ml-2 inline-flex items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
             >
               <Trash2 size={16} />
               Clear All
