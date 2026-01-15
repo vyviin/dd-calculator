@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, Calculator } from 'lucide-react';
+import { Plus, Trash2, Calculator, GraduationCap } from 'lucide-react';
 
 const GradeConverter = () => {
   const [courses, setCourses] = useState([
@@ -58,7 +58,6 @@ const GradeConverter = () => {
       
       if (!conversion) return null;
       
-      // Return the conversion with all necessary properties
       return {
         wluLetter: conversion.letter,
         wluPoints: conversion.points,
@@ -110,7 +109,6 @@ const GradeConverter = () => {
       const credits = parseFloat(course.credits);
       
       if (course.university === 'UW') {
-        // For UW courses: use actual grade for UW average, convert to WLU points
         const numGrade = parseFloat(course.grade);
         const conversion = convertGrade(course.university, course.grade);
         if (!conversion) return;
@@ -118,7 +116,6 @@ const GradeConverter = () => {
         uwTotal += numGrade * credits;
         wluTotal += conversion.wluPoints * credits;
       } else {
-        // For WLU courses: use actual letter grade points for WLU average, convert to UW percentage
         const conversion = convertGrade(course.university, course.grade);
         if (!conversion) return;
         
@@ -146,19 +143,22 @@ const GradeConverter = () => {
   const results = calculateAverages();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4">
-      <div className="max-w-5xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <h1 className="text-3xl font-bold text-purple-900 mb-2">
-            UW/WLU Double Degree GPA Calculator
-          </h1>
-          <p className="text-gray-600 text-sm">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-5xl mx-auto px-6 py-12">
+        {/* Header */}
+        <div className="mb-12">
+          <div className="flex items-center gap-2 mb-3">
+            <GraduationCap className="text-gray-700" size={32} strokeWidth={1.5} />
+            <h1 className="text-4xl font-semibold text-gray-900">UW/WLU GPA Calculator</h1>
+          </div>
+          <p className="text-gray-500 text-base">
             Enter your courses and grades to calculate your averages at both universities
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          <div className="grid grid-cols-12 gap-3 mb-3 font-semibold text-gray-700 text-sm">
+        {/* Course Table */}
+        <div className="mb-8">
+          <div className="grid grid-cols-12 gap-3 mb-2 px-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
             <div className="col-span-3">Course Name</div>
             <div className="col-span-2">University</div>
             <div className="col-span-3">Grade</div>
@@ -166,22 +166,22 @@ const GradeConverter = () => {
             <div className="col-span-2">Converted</div>
           </div>
 
-          {courses.map((course, index) => {
+          {courses.map((course) => {
             const conversion = convertGrade(course.university, course.grade);
             return (
-              <div key={course.id} className="grid grid-cols-12 gap-3 mb-3 items-center">
+              <div key={course.id} className="grid grid-cols-12 gap-3 mb-2 items-center group">
                 <input
                   type="text"
                   placeholder="e.g., MATH 135"
                   value={course.name}
                   onChange={(e) => updateCourse(course.id, 'name', e.target.value)}
-                  className="col-span-3 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="col-span-3 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                 />
                 
                 <select
                   value={course.university}
                   onChange={(e) => updateCourse(course.id, 'university', e.target.value)}
-                  className="col-span-2 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="col-span-2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                 >
                   <option value="UW">UW</option>
                   <option value="WLU">WLU</option>
@@ -192,7 +192,7 @@ const GradeConverter = () => {
                   placeholder={course.university === 'UW' ? '0-100' : 'A+, B, C-, etc.'}
                   value={course.grade}
                   onChange={(e) => updateCourse(course.id, 'grade', e.target.value)}
-                  className="col-span-3 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="col-span-3 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                 />
 
                 <input
@@ -201,7 +201,7 @@ const GradeConverter = () => {
                   placeholder="0.5"
                   value={course.credits}
                   onChange={(e) => updateCourse(course.id, 'credits', e.target.value)}
-                  className="col-span-2 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="col-span-2 px-3 py-2 text-sm bg-white border border-gray-200 rounded-md hover:border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                 />
 
                 <div className="col-span-2 flex items-center justify-between">
@@ -214,15 +214,15 @@ const GradeConverter = () => {
                         }
                       </span>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-gray-300">—</span>
                     )}
                   </span>
                   <button
                     onClick={() => removeCourse(course.id)}
-                    className="ml-2 text-red-500 hover:text-red-700 disabled:text-gray-300"
+                    className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-all disabled:hover:bg-transparent disabled:hover:text-gray-300"
                     disabled={courses.length === 1}
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </div>
@@ -231,54 +231,56 @@ const GradeConverter = () => {
 
           <button
             onClick={addCourse}
-            className="mt-4 flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
+            className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
           >
-            <Plus size={18} />
+            <Plus size={16} />
             Add Course
           </button>
         </div>
 
+        {/* Results */}
         {results && (
-          <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+          <div className="bg-gray-50 rounded-lg border border-gray-200 p-6 mb-6">
             <div className="flex items-center gap-2 mb-4">
-              <Calculator size={24} />
-              <h2 className="text-2xl font-bold">Your Results</h2>
+              <Calculator size={20} className="text-gray-700" strokeWidth={1.5} />
+              <h2 className="text-xl font-semibold text-gray-900">Your Results</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-white bg-opacity-20 rounded-lg p-4">
-                <div className="text-sm opacity-90 mb-1">UW Average</div>
-                <div className="text-3xl font-bold">{results.uwAverage}%</div>
+              <div className="bg-white rounded-md border border-gray-200 p-4">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">UW Average</div>
+                <div className="text-3xl font-semibold text-gray-900">{results.uwAverage}%</div>
               </div>
               
-              <div className="bg-white bg-opacity-20 rounded-lg p-4">
-                <div className="text-sm opacity-90 mb-1">WLU Average</div>
-                <div className="text-3xl font-bold">{results.wluAverage}</div>
-                <div className="text-xs opacity-75">out of 12</div>
+              <div className="bg-white rounded-md border border-gray-200 p-4">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">WLU Average</div>
+                <div className="text-3xl font-semibold text-gray-900">{results.wluAverage}</div>
+                <div className="text-xs text-gray-500">out of 12</div>
               </div>
               
-              <div className="bg-white bg-opacity-20 rounded-lg p-4">
-                <div className="text-sm opacity-90 mb-1">4.0 GPA Scale</div>
-                <div className="text-3xl font-bold">{results.gpa4}</div>
-                <div className="text-xs opacity-75">out of 4.0</div>
+              <div className="bg-white rounded-md border border-gray-200 p-4">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">4.0 GPA Scale</div>
+                <div className="text-3xl font-semibold text-gray-900">{results.gpa4}</div>
+                <div className="text-xs text-gray-500">out of 4.0</div>
               </div>
               
-              <div className="bg-white bg-opacity-20 rounded-lg p-4">
-                <div className="text-sm opacity-90 mb-1">Total Credits</div>
-                <div className="text-3xl font-bold">{results.totalCredits}</div>
+              <div className="bg-white rounded-md border border-gray-200 p-4">
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Total Credits</div>
+                <div className="text-3xl font-semibold text-gray-900">{results.totalCredits}</div>
               </div>
             </div>
 
-            <div className="mt-4 text-sm opacity-90 bg-white bg-opacity-10 rounded p-3">
+            <div className="mt-4 text-sm text-gray-600 bg-blue-50 border border-blue-100 rounded-md p-3">
               <strong>Note:</strong> Your UW transcript shows the percentage average ({results.uwAverage}%), 
               while your WLU transcript shows the 12-point scale average ({results.wluAverage}).
             </div>
           </div>
         )}
 
-        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-gray-700">
-          <h3 className="font-semibold text-blue-900 mb-2">How It Works</h3>
-          <ul className="space-y-1 text-xs">
+        {/* Info */}
+        <div className="bg-gray-50 rounded-lg border border-gray-200 p-5">
+          <h3 className="font-semibold text-gray-900 mb-3 text-sm">How It Works</h3>
+          <ul className="space-y-2 text-sm text-gray-600">
             <li>• Enter your course grades using the grading system from each university (UW: 0-100, WLU: letter grades)</li>
             <li>• The calculator converts grades between systems and calculates both averages</li>
             <li>• UW courses are converted to WLU's 12-point scale for your WLU transcript</li>
