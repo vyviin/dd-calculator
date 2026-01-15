@@ -49,13 +49,22 @@ const GradeConverter = () => {
       const conversion = conversionTable.UW.find(
         c => numGrade >= c.min && numGrade <= c.max
       );
-      return conversion;
+      return conversion || null;
     } else {
-      const upperGrade = grade.toUpperCase();
+      const upperGrade = grade.trim().toUpperCase();
       const conversion = conversionTable.WLU.find(
         c => c.letter === upperGrade
       );
-      return conversion;
+      
+      if (!conversion) return null;
+      
+      // Return the conversion with all necessary properties
+      return {
+        wluLetter: conversion.letter,
+        wluPoints: conversion.points,
+        uwAvg: conversion.uwAvg,
+        gpa4: conversion.gpa4
+      };
     }
   };
 
@@ -81,7 +90,14 @@ const GradeConverter = () => {
       if (!c.grade || !c.credits) return false;
       const credits = parseFloat(c.credits);
       if (isNaN(credits) || credits <= 0) return false;
-      return convertGrade(c.university, c.grade) !== null;
+      
+      if (c.university === 'UW') {
+        const numGrade = parseFloat(c.grade);
+        return !isNaN(numGrade) && numGrade >= 0 && numGrade <= 100;
+      } else {
+        const conversion = convertGrade(c.university, c.grade);
+        return conversion !== null && conversion !== undefined;
+      }
     });
 
     if (validCourses.length === 0) return null;
@@ -91,19 +107,36 @@ const GradeConverter = () => {
     let totalCredits = 0;
 
     validCourses.forEach(course => {
-      const conversion = convertGrade(course.university, course.grade);
       const credits = parseFloat(course.credits);
       
-      uwTotal += conversion.uwAvg * credits;
-      wluTotal += conversion.wluPoints * credits;
+      if (course.university === 'UW') {
+        // For UW courses: use actual grade for UW average, convert to WLU points
+        const numGrade = parseFloat(course.grade);
+        const conversion = convertGrade(course.university, course.grade);
+        if (!conversion) return;
+        
+        uwTotal += numGrade * credits;
+        wluTotal += conversion.wluPoints * credits;
+      } else {
+        // For WLU courses: use actual letter grade points for WLU average, convert to UW percentage
+        const conversion = convertGrade(course.university, course.grade);
+        if (!conversion) return;
+        
+        uwTotal += conversion.uwAvg * credits;
+        wluTotal += conversion.wluPoints * credits;
+      }
+      
       totalCredits += credits;
     });
+
+    if (totalCredits === 0) return null;
 
     return {
       uwAverage: (uwTotal / totalCredits).toFixed(2),
       wluAverage: (wluTotal / totalCredits).toFixed(2),
       gpa4: (validCourses.reduce((sum, c) => {
         const conv = convertGrade(c.university, c.grade);
+        if (!conv) return sum;
         return sum + (conv.gpa4 * parseFloat(c.credits));
       }, 0) / totalCredits).toFixed(2),
       totalCredits: totalCredits.toFixed(1)
